@@ -1,0 +1,4 @@
+    Finished `release` profile [optimized] target(s) in 0.04s
+     Running `target/release/tester ../a.out`
+Best score: 2378713
+Score = 2461717
