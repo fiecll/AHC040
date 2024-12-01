@@ -1,7 +1,8 @@
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
-    Finished `release` profile [optimized] target(s) in 0.11s
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on build directory
+    Finished `release` profile [optimized] target(s) in 0.10s
      Running `target/release/tester ../a.out`
-Best score: 4452160
-Score = 4605193
+Score = 1650964

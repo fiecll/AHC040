@@ -5,5 +5,4 @@
     Blocking waiting for file lock on build directory
     Finished `release` profile [optimized] target(s) in 0.11s
      Running `target/release/tester ../a.out`
-Best score: 1623185
-Score = 1628337
+Score = 831792

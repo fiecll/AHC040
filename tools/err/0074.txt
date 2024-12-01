@@ -1,4 +1,6 @@
-    Finished `release` profile [optimized] target(s) in 0.02s
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Finished `release` profile [optimized] target(s) in 0.05s
      Running `target/release/tester ../a.out`
-Best score: 4887812
-Score = 4897487
+Score = 1472452
