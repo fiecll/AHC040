@@ -1,4 +1,0 @@
-    Finished `release` profile [optimized] target(s) in 0.03s
-     Running `target/release/tester ../a.out`
-Rectangle 85 is not used
-Score = 0

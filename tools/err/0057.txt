@@ -1,3 +1,0 @@
-    Finished `release` profile [optimized] target(s) in 0.02s
-     Running `target/release/tester ../a.out`
-Score = 1095583
