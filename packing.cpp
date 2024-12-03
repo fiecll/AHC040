@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <queue> 
 #include <tuple>
 #include <fstream>
 using namespace std;
@@ -91,103 +90,66 @@ struct SequencePair {
     return max_x + max_y;  
     }
 
- vector<Placement> generate_operations_from_sequence_pair() {
+    // シーケンスペアから操作手順を生成する関数
+vector<Placement> generate_operations_from_sequence_pair() {
     vector<Placement> operations;
 
-    // 各長方形の回転後の幅と高さを計算
-    vector<int> widths(N), heights(N);
+    // 配置済みの矩形を管理する
+    vector<bool> placed(N, false);
+
+    // シーケンスペアの順序に従い操作を生成
     for (int i = 0; i < N; ++i) {
-        if (rect[i].rotate) {
-            widths[i] = rect[i].h;
-            heights[i] = rect[i].w;
-        } else {
-            widths[i] = rect[i].w;
-            heights[i] = rect[i].h;
-        }
-    }
-
-    // HCG（水平制約グラフ）と VCG（垂直制約グラフ）の構築
-    unordered_map<int, int> pos_in_P, pos_in_Q;
-    for (int i = 0; i < N; ++i) {
-        pos_in_P[P[i]] = i;
-        pos_in_Q[Q[i]] = i;
-    }
-    vector<vector<int>> adj_H(N), adj_V(N);
-    for (int i = 0; i < N; ++i) {
-        int rect_i = P[i];
-        for (int j = 0; j < N; ++j) {
-            if (i == j) continue;
-            int rect_j = P[j];
-            if (pos_in_P[rect_i] < pos_in_P[rect_j] && pos_in_Q[rect_i] < pos_in_Q[rect_j]) {
-                adj_H[rect_i].push_back(rect_j);
-            } else if (pos_in_P[rect_i] < pos_in_P[rect_j] && pos_in_Q[rect_i] > pos_in_Q[rect_j]) {
-                adj_V[rect_i].push_back(rect_j);
-            }
-        }
-    }
-
-    // HCG に基づく x 座標の計算
-    vector<int> in_degree_H(N, 0);
-    for (int i = 0; i < N; ++i)
-        for (int j : adj_H[i]) in_degree_H[j]++;
-    queue<int> q;
-    for (int i = 0; i < N; ++i)
-        if (in_degree_H[i] == 0) q.push(i);
-    while (!q.empty()) {
-        int u = q.front(); q.pop();
-        for (int v : adj_H[u]) {
-            if (x_coords[v] < x_coords[u] + widths[u]) {
-                x_coords[v] = x_coords[u] + widths[u];
-            }
-            if (--in_degree_H[v] == 0) q.push(v);
-        }
-    }
-
-    // VCG に基づく y 座標の計算
-    vector<int> in_degree_V(N, 0);
-    for (int i = 0; i < N; ++i)
-        for (int j : adj_V[i]) in_degree_V[j]++;
-    for (int i = 0; i < N; ++i)
-        if (in_degree_V[i] == 0) q.push(i);
-    while (!q.empty()) {
-        int u = q.front(); q.pop();
-        for (int v : adj_V[u]) {
-            if (y_coords[v] < y_coords[u] + heights[u]) {
-                y_coords[v] = y_coords[u] + heights[u];
-            }
-            if (--in_degree_V[v] == 0) q.push(v);
-        }
-    }
-
-    // 配置手順の生成
-    for (int idx = 0; idx < N; ++idx) {
-        int rect_id = P[idx];
+        int rect_id = P[i];
+        Rect nextrect = rect[rect_id];
         Placement op;
         op.id = rect_id;
         op.r = rect[rect_id].rotate ? 1 : 0;
 
-        int x = x_coords[rect_id];
-        int y = y_coords[rect_id];
 
-        // デフォルトで 'U' を設定
-        op.d = 'U';
-        op.b = -1;
-
-        for (int j = 0; j < idx; ++j) {
-            int prev_id = P[j];
-            if (x_coords[prev_id] + widths[prev_id] == x) {
-                op.b = prev_id;
-                break;
+        // 配置方向と基準の決定
+        if (y_coords[rect_id] == 0) {
+            // 下から上に配置
+            op.d = 'U';
+            op.b = -1; // 基準なし（軸）
+        } else if (x_coords[rect_id] == 0) {
+            // 右から左に配置
+            op.d = 'L';
+            op.b = -1; // 基準なし（軸）
+        } else {
+            // 基準を探す（配置済みの矩形を考慮）
+            int base = -1;
+            if (op.d == 'U') {
+                // 左に最も近い矩形を基準とする
+                int max_x = -1;
+                for (int j = 0; j < N; ++j) {
+                    if (placed[j] && x_coords[j] + rect[j].w <= x_coords[rect_id]) {
+                        if (x_coords[j] + rect[j].w > max_x) {
+                            max_x = x_coords[j] + rect[j].w;
+                            base = j;
+                        }
+                    }
+                }
+            } else if (op.d == 'L') {
+                // 下に最も近い矩形を基準とする
+                int max_y = -1;
+                for (int j = 0; j < N; ++j) {
+                    if (placed[j] && y_coords[j] + rect[j].h <= y_coords[rect_id]) {
+                        if (y_coords[j] + rect[j].h > max_y) {
+                            max_y = y_coords[j] + rect[j].h;
+                            base = j;
+                        }
+                    }
+                }
             }
+            op.b = base;
         }
 
+        // 配置済み矩形としてマーク
+        placed[rect_id] = true;
         operations.push_back(op);
     }
-
     return operations;
 }
-
-
 
 };
 
@@ -235,16 +197,11 @@ int main() {
 
     vector<Placement> ops = sp2.generate_operations_from_sequence_pair();
 
-
     // 操作手順を出力
-    ofstream out("operations.txt");
     for (const auto &op : ops) {
-        out << op.id << " " << op.r << " " << op.d << " " << op.b << endl;
+        debug_out << op.id << " " << op.r << " " << op.d << " " << op.b << endl;
     }
-     for(int i=0;i<4;i++){
-        out << sp2.x_coords[i] << " " << sp2.y_coords[i] << endl;
-    }
-    out.close();
+
     return 0;
 }
  
